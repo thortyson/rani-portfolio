@@ -360,10 +360,10 @@
     const measure = () => {
       pinTop = s2pin.offsetTop;
       range = Math.max(1, s2pin.offsetHeight - window.innerHeight);
-      s2Range = window.innerHeight * (isMobileLayout() ? 1.8 : 2.4);
+      s2Range = window.innerHeight * (isMobileLayout() ? 1.2 : 2.4);
       /* fixed transition scrub; any extra pin height is a "dwell" where
          the About screen rests at pt = 1 before Works begins */
-      trRange = window.innerHeight * (isMobileLayout() ? 2.8 : 3.4);
+      trRange = window.innerHeight * (isMobileLayout() ? 1.8 : 3.4);
       centers = labelWraps.map((w) => {
         const r = w.getBoundingClientRect();
         return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
@@ -428,11 +428,18 @@
       }
       if (!active) return;
 
-      // chrome-less cinematic moment: the site header steps aside
+      // chrome-less cinematic moment: the site header steps aside during transition on desktop
       if (siteHeader) {
-        const hOut = easeOut(sub(pt, 0, 0.14));
-        siteHeader.style.opacity = (1 - hOut).toFixed(3);
-        siteHeader.style.pointerEvents = hOut > 0.5 ? "none" : "";
+        if (!isMobileLayout()) {
+          const hOut = easeOut(sub(pt, 0, 0.14));
+          const hBack = pt > 0.85 ? easeOut(sub(pt, 0.85, 0.98)) : 0;
+          const currentAlpha = Math.max(0, 1 - hOut + hBack);
+          siteHeader.style.opacity = currentAlpha.toFixed(3);
+          siteHeader.style.pointerEvents = currentAlpha > 0.3 ? "" : "none";
+        } else {
+          siteHeader.style.opacity = "1";
+          siteHeader.style.pointerEvents = "";
+        }
       }
 
       // the side rails detach first
@@ -453,7 +460,8 @@
       p3Corners.forEach((c) => { c.style.opacity = cornersIn.toFixed(3); });
 
       // the About Me composition assembles behind the departing pieces
-      const locked = pt > 0.985;
+      const lockedThreshold = isMobileLayout() ? 0.72 : 0.95;
+      const locked = pt > lockedThreshold;
       if (!locked) {
         if (abTitle) {
           const te = easeInOut(sub(pt, 0.55, 0.8));
@@ -539,6 +547,10 @@
     const onS2Scroll = () => {
       target = clamp01((window.scrollY - pinTop) / range);
       docEl.classList.toggle("beyond-hero", window.scrollY > window.innerHeight * 0.85);
+      if (siteHeader && (window.scrollY > pinTop + range || isMobileLayout())) {
+        siteHeader.style.opacity = "";
+        siteHeader.style.pointerEvents = "";
+      }
       if (rafS2 === null) rafS2 = requestAnimationFrame(step);
     };
 
@@ -751,7 +763,7 @@
 
     const applyWk = (p) => {
       const a = p * (N - 1);
-      const depth = isMobileWk() ? 520 : 820;
+      const depth = isMobileWk() ? 460 : 820;
       const lat = isMobileWk() ? 2.4 : 5.4;
       const mobile = isMobileWk();
 
@@ -1014,7 +1026,8 @@
 
       panels.forEach((panel, i) => {
         const u = band(p, i * step, i * step + RB.span);   // this panel's own travel
-        const z = RB.zFar + (RB.zPast - RB.zFar) * u;
+        const maxZ = isMob() ? 500 : RB.zPast;
+        const z = RB.zFar + (maxZ - RB.zFar) * u;
         // the offset is held and widens as it nears: the panel sweeps past
         // the viewer on its own side instead of covering the robot
         const x = panel.side * RB.lateral * (0.52 + 0.48 * u) * (isMob() ? 0.42 : 1);
@@ -1563,7 +1576,16 @@
 
   if (mobileClose) mobileClose.addEventListener("click", closeMobileNav);
   if (mobileBackdrop) mobileBackdrop.addEventListener("click", closeMobileNav);
-  if (mobileCta) mobileCta.addEventListener("click", closeMobileNav);
+  if (mobileCta) {
+    mobileCta.addEventListener("click", (e) => {
+      closeMobileNav();
+      const el = document.getElementById("contact");
+      if (el) {
+        e.preventDefault();
+        el.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth" });
+      }
+    });
+  }
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && mobileDrawer && mobileDrawer.classList.contains("is-open")) {
@@ -1585,7 +1607,7 @@
       } else if (target === "about" || href === "#about" || href === "#section-03") {
         e.preventDefault();
         if (s2.jumpTr) {
-          s2.jumpTr(1);
+          s2.jumpTr(isMobileLayout() ? 0.85 : 1);
         } else {
           const el = document.getElementById("section-03") || document.getElementById("about");
           if (el) el.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth" });

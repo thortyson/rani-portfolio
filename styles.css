@@ -528,13 +528,15 @@ a, button { touch-action: manipulation; -webkit-tap-highlight-color: transparent
 /* ---------- Mobile Navigation Drawer Overlay ---------- */
 body.mobile-nav-open {
   overflow: hidden !important;
-  touch-action: none;
 }
 
 .mobile-nav-drawer {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 99999;
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
@@ -551,9 +553,9 @@ body.mobile-nav-open {
 .mobile-nav-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(5, 2, 2, 0.85);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  backdrop-filter: blur(20px) saturate(140%);
+  background: rgba(5, 2, 2, 0.88);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  backdrop-filter: blur(24px) saturate(140%);
 }
 
 .mobile-nav-dialog {
@@ -563,6 +565,7 @@ body.mobile-nav-open {
   right: 0;
   bottom: 0;
   max-width: 500px;
+  width: 100%;
   margin: 0 auto;
   padding: max(18px, env(safe-area-inset-top, 18px)) max(20px, env(safe-area-inset-right, 20px)) max(24px, env(safe-area-inset-bottom, 24px)) max(20px, env(safe-area-inset-left, 20px));
   display: flex;
@@ -572,6 +575,8 @@ body.mobile-nav-open {
   transition: transform 0.38s var(--ease-cine);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  box-sizing: border-box;
 }
 
 .mobile-nav-drawer.is-open .mobile-nav-dialog {
@@ -1104,10 +1109,17 @@ button:focus-visible {
 
   .site-header {
     top: max(12px, env(safe-area-inset-top, 12px));
-    padding: 0 max(16px, env(safe-area-inset-right, 16px)) 0 max(16px, env(safe-area-inset-left, 16px));
+    width: calc(100% - 24px);
+    max-width: 520px;
+    padding: 0;
   }
 
-  .header-pill { height: 56px; padding: 0 8px 0 18px; gap: 10px; }
+  .header-pill {
+    width: 100%;
+    height: 54px;
+    padding: 0 8px 0 16px;
+    gap: 10px;
+  }
   .brand-mark { width: 34px; height: 19px; }
   .cta { height: 38px; padding: 0 15px; font-size: 13.5px; }
   .theme-btn { width: 38px; height: 38px; }
@@ -1454,7 +1466,7 @@ button:focus-visible {
 }
 
 @media (max-width: 720px) {
-  .s2-pin { height: 610vh; } /* 180vh s2 scrub + 280vh transition + 50vh About dwell */
+  .s2-pin { height: 420vh; } /* 120vh s2 scrub + 180vh transition + 20vh About dwell */
 
   .s2-comp {
     width: 100%;
@@ -2253,6 +2265,8 @@ html.works-open .wk { display: block; }
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .wk-scroll::-webkit-scrollbar { display: none; }
@@ -2651,7 +2665,7 @@ html.works-open .wk { display: block; }
   .wk-dim { font-size: clamp(24px, 8.6vw, 36px); }
   .wk-corner { display: none; } /* the head carries the brand on small screens */
 
-  .wk-space { perspective: 1100px; }
+  .wk-space { perspective: 1100px; overflow: hidden; }
 
   .wk-head {
     top: max(14px, env(safe-area-inset-top, 14px));
@@ -3055,7 +3069,7 @@ html.works-open .wk { display: block; }
 
 @media (max-width: 720px) {
   .rb-pin { height: 330vh; }
-  .rb-space { perspective: 700px; }
+  .rb-space { perspective: 1200px; overflow: hidden; }
   .rb-center {
     bottom: max(6svh, calc(env(safe-area-inset-bottom, 0px) + 20px));
     left: max(16px, env(safe-area-inset-left, 16px));
